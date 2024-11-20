@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "891793719511",
+    "project_id": "app-voluntariado-88af3",
+    "storage_bucket": "app-voluntariado-88af3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:891793719511:android:8b6ac2f5bb6192b57e7092",
+        "android_client_info": {
+          "package_name": "com.app.voluntariado"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeHBR1K0F5QAn-63ADVsiME_PxCE5YsAk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

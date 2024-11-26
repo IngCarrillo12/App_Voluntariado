@@ -68,27 +68,27 @@ class _DateTimeInputFormState extends State<DateTimeInputForm> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: widget.controller,
-      readOnly: true,
-      onTap: () => _selectDateTime(context),
-      decoration: InputDecoration(
-        hintText: widget.hintText,
-        hintStyle: TextStyle(color: widget.placeholderColor),
-        filled: true,
-        fillColor: widget.bgColor,
-        prefixIcon: widget.icon,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: widget.borderColor),
-        ),
-        disabledBorder:  OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: widget.borderColor),
-        ),
+Widget build(BuildContext context) {
+  return TextField(
+    controller: widget.controller,
+    readOnly: true,
+    onTap: () => _selectDateTime(context),
+    decoration: InputDecoration(
+      hintText: widget.hintText,
+      hintStyle: TextStyle(color: widget.placeholderColor),
+      filled: true,
+      fillColor: widget.bgColor,
+      prefixIcon: widget.icon,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: widget.borderColor, width: 1),
       ),
-      style: TextStyle(color: widget.textColor),
-    );
-  }
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: widget.borderColor, width: 1),
+      ),
+    ),
+    style: TextStyle(color: widget.textColor),
+  );
+}
 }

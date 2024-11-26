@@ -18,8 +18,8 @@ class InputForm extends StatelessWidget {
     this.plhColor = Colors.grey,
     this.bgColor = Colors.black26,
     this.txtColor = Colors.black,
-    this.borderColor = Colors.pinkAccent,
-    this.focusBorderColor = Colors.blue, // Color predeterminado para el borde en focus
+    this.borderColor = Colors.grey,
+    this.focusBorderColor = Colors.pinkAccent, // Color predeterminado para el borde en focus
     required this.icon,
     required this.controller,
     this.obscureText = false,

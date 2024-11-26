@@ -31,9 +31,9 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
   bool _isDateCurrentOrFuture(DateTime date) {
     final now = DateTime.now();
     final activityDate = DateTime(date.year, date.month, date.day, date.hour, date.minute);
-    return now.isBefore(activityDate) || now.isAtSameMomentAs(activityDate);
+    return now.isAfter(activityDate) || now.isAtSameMomentAs(activityDate);
   }
-
+ 
   Future<void> _updateAttendance(
   BuildContext context,
   ActivitiesProvider activitiesProvider,
@@ -80,14 +80,14 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
       });
     }
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     final activitiesProvider = Provider.of<ActivitiesProvider>(context);
     final activity = activitiesProvider.getActivityById(widget.activityId);
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
-
+   bool activityFound = user?.historialParticipacion.contains(widget.activityId) ?? false;
     if (activity == null) {
       return Scaffold(
         appBar: AppBar(
@@ -128,57 +128,68 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
             ),
           ),
           Positioned.fill(
-            top: 250,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+  top: 250,
+  child: Container(
+    padding: const EdgeInsets.all(16),
+    decoration: const BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(30),
+        topRight: Radius.circular(30),
+      ),
+    ),
+    child: ListView(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  activity.titulo,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              child: ListView(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            activity.titulo,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on, color: Colors.grey, size: 16),
-                              const SizedBox(width: 4),
-                              Text(
-                                _isLoadingLocation
-                                    ? "Cargando ubicación..."
-                                    : _locationName ?? "Ubicación no disponible",
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.calendar_today, color: Colors.grey, size: 16),
-                              const SizedBox(width: 4),
-                              Text(
-                                "${activity.fechahora.day}/${activity.fechahora.month}/${activity.fechahora.year}",
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Icon(Icons.location_on, color: Colors.grey, size: 16),
+            const SizedBox(width: 4),
+            Text(
+              _isLoadingLocation
+                  ? "Cargando ubicación..."
+                  : _locationName ?? "Ubicación no disponible",
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            const Icon(Icons.calendar_today, color: Colors.grey, size: 16),
+            const SizedBox(width: 4),
+            Text(
+              "${activity.fechahora.day}/${activity.fechahora.month}/${activity.fechahora.year}",
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            const Icon(Icons.hourglass_bottom_sharp, color: Colors.grey, size: 16),
+            const SizedBox(width: 4),
+            Text(
+              "Duración: ${activity.duracion} Min",
+            ),
+          ],
+        ),
                   const SizedBox(height: 16),
                   const Text(
                     "About",
@@ -187,9 +198,100 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
                   const SizedBox(height: 8),
                   Text(activity.descripcion, style: const TextStyle(color: Colors.grey)),
                   const SizedBox(height: 24),
+                 // Botones de acción según el rol del usuario
+                 if(user?.rol == 'voluntario' && !_isDateCurrentOrFuture(activity.fechahora))
+                      Button(
+                          text: activityFound ? 'Cancelar asistencia' : 'Asistir',
+                          onPressed: () async {
+                            if (user == null) return;
+
+                            final userInfo = {
+                              'userId': user.userId,
+                              'nombreCompleto': user.nombreCompleto,
+                              'correo': user.correo,
+                            };
+
+                            if (activityFound) {
+                              await userProvider.removeActivityFromHistory(widget.activityId);
+                              await activitiesProvider.removeVolunteerFromActivity(
+                                  widget.activityId, userInfo);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Has cancelado la asistencia')));
+                            } else {
+                              await userProvider.addActivityToHistory(widget.activityId);
+                              await activitiesProvider.addVolunteerToActivity(
+                                  widget.activityId, userInfo);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Te has inscrito en la actividad.')));
+                            }
+                          },
+                          bgColor: Colors.pinkAccent,
+                        ),
+                      if(user?.rol == 'organizador')
+                          Column(
+                        children: [
+                          Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Buttonicon(
+                                text: 'Eliminar',
+                                icon: const Icon(Icons.delete, color: Colors.white),
+                                bgColor: Colors.pinkAccent,
+                                colorText: Colors.white,
+                                onPressed: () async {
+                                  await activitiesProvider.deleteActivity(widget.activityId);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Actividad eliminada con éxito')),
+                                  );
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12.0),
+                            Expanded(
+                              child: Buttonicon(
+                                text: 'Editar',
+                                icon: const Icon(Icons.edit, color: Colors.white),
+                                bgColor: Colors.pinkAccent,
+                                colorText: Colors.white,
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          CreateOrEditActivityPage(activity: activity),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                          ),
+                        ],
+                        ),
+
                   if (user?.rol == 'organizador' && _isDateCurrentOrFuture(activity.fechahora))
+                    Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Título de Asistencia
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                      child: Text(
+                        "Asistencia",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    // Lista de voluntarios y asistencia
                     ListView.builder(
                       shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(), // Evita conflictos de scroll
                       itemCount: activity.voluntarios.length,
                       itemBuilder: (context, index) {
                         final voluntario = activity.voluntarios[index];
@@ -211,13 +313,15 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
                                   voluntario['userId'],
                                   value,
                                   activity,
-                                );
-                              }
-                            },
-                          ),
-                        );
-                      },
-                    ),
+                );
+              }
+            },
+          ),
+        );
+      },
+    ),
+  ],
+)
                 ],
               ),
             ),

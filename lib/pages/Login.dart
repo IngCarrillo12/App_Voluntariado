@@ -6,7 +6,10 @@ import 'package:frontend_flutter/Widgets/Headers/HeaderForm.dart';
 import 'package:frontend_flutter/Widgets/Inputs/InputForm.dart';
 import 'package:frontend_flutter/Widgets/Logo.dart';
 import 'package:frontend_flutter/Widgets/Button/TextButton.dart';
+import 'package:frontend_flutter/providers/activitiesProvider.dart';
+import 'package:frontend_flutter/providers/userProvider.dart';
 import 'package:frontend_flutter/services/authService.dart';
+import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -22,22 +25,30 @@ class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   // Método para manejar el inicio de sesión
-  Future<void> _signIn() async {
-    if (_formKey.currentState!.validate()) {
-      String email = _emailController.text.trim();
-      String password = _passwordController.text.trim();
+Future<void> _signIn() async {
+  if (_formKey.currentState!.validate()) {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
 
-      User? user = await _authService.signIn(email, password);
+    User? user = await _authService.signIn(email, password);
 
-      if (user != null) {
-        Navigator.pushNamed(context, '/home');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error en el inicio de sesión, verifica tus credenciales")),
-        );
-      }
+    if (user != null) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final activitiesProvider = Provider.of<ActivitiesProvider>(context, listen: false);
+
+      // Reinicia el estado
+      activitiesProvider.resetData();
+      await userProvider.loadUserInfo();
+      await activitiesProvider.loadActivities();
+
+      Navigator.pushNamed(context, '/home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error en el inicio de sesión, verifica tus credenciales")),
+      );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {

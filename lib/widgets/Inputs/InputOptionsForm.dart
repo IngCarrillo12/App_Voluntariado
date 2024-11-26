@@ -6,6 +6,7 @@ class InputOptionsForm extends StatefulWidget {
   final Color borderColor;
   final List<String> options;
   final TextEditingController controller;
+  final void Function(String) onChanged; // Siempre recibe un onChanged
 
   const InputOptionsForm({
     Key? key,
@@ -14,7 +15,11 @@ class InputOptionsForm extends StatefulWidget {
     required this.options,
     required this.controller,
     this.borderColor = Colors.pinkAccent,
+    this.onChanged = _defaultOnChanged, 
   }) : super(key: key);
+
+  static void _defaultOnChanged(String value) {}
+  // Método por defecto si no se proporciona onChanged.
 
   @override
   _InputOptionsForm createState() => _InputOptionsForm();
@@ -42,6 +47,7 @@ class _InputOptionsForm extends State<InputOptionsForm> {
                 title: Text(widget.options[index]),
                 onTap: () {
                   widget.controller.text = widget.options[index];
+                  widget.onChanged(widget.options[index]); // Siempre ejecuta onChanged
                   Navigator.pop(context);
                 },
               );
@@ -66,11 +72,11 @@ class _InputOptionsForm extends State<InputOptionsForm> {
             fillColor: Colors.white,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: widget.borderColor, width: 2),
+              borderSide: BorderSide(color: widget.borderColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: widget.borderColor, width: 2),
+              borderSide: BorderSide(color: widget.borderColor),
             ),
           ),
         ),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/pages/ActivitiesFilterPage.dart';
-import 'package:frontend_flutter/pages/ActivitiesPage.dart';
+import 'package:frontend_flutter/pages/AllActivitiesPage.dart';
 import 'package:frontend_flutter/pages/ActivityDetailPage.dart';
 import 'package:frontend_flutter/pages/CreateOrEditActivityPage.dart';
 import 'package:frontend_flutter/Widgets/LocationMap.dart';
 import 'package:frontend_flutter/models/activitiesModel.dart';
-import 'package:frontend_flutter/pages/MisActivities.dart';
+import 'package:frontend_flutter/pages/ActivitiesByUsers.dart';
 import 'package:frontend_flutter/providers/userProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_flutter/pages/Home.dart';
@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
           '/home': (context) => const Home(),
           '/register': (context) => const Register(),
           '/profile': (context) => const Profile(),
-          '/activitiesPage': (context) => const ActivitiesPage(),
+          '/activitiesPage': (context) => const AllActivitiesPage(),
           '/createOrEditActivity': (context) => const CreateOrEditActivityPage(),
            '/activityDetailPage': (context) {
             final activityId = ModalRoute.of(context)!.settings.arguments as String;
@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
               final arguments = ModalRoute.of(context)!.settings.arguments as List<Activity>;
               return ActivitiesFilterPage(activities: arguments);
             },
-          '/userActivitiesPage': (context) => const UserSpecificActivitiesPage(),
+          '/userActivitiesPage': (context) => const UserActivitiesPage(),
 
           
 

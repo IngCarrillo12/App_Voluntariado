@@ -64,41 +64,43 @@ class _CreateOrEditActivityPageState extends State<CreateOrEditActivityPage> {
     }
   }
 
-  Future<void> _saveActivity() async {
-    if (_formKey.currentState!.validate()) {
-      final activity = Activity(
-        id: widget.activity?.id ?? '', 
-        titulo: _titleController.text,
-        descripcion: _descriptionController.text,
-        fechahora: _selectedDateTime!,
-        ubicacion: _selectedLocation!,
-        categoria: _categoryController.text,
-        maxVoluntarios: int.parse(_maxVolunteersController.text),
-        imageUrl: _imageUrlController.text,
-        voluntarios: widget.activity?.voluntarios ?? [],
-        duracion: int.parse(_durationController.text),
-        asistencia: widget.activity?.asistencia ?? {},
+Future<void> _saveActivity() async {
+  if (_formKey.currentState!.validate()) {
+    final activity = Activity(
+      id: widget.activity?.id ?? '',
+      titulo: _titleController.text,
+      descripcion: _descriptionController.text,
+      fechahora: _selectedDateTime!,
+      ubicacion: _selectedLocation!,
+      categoria: _categoryController.text,
+      maxVoluntarios: int.parse(_maxVolunteersController.text),
+      imageUrl: _imageUrlController.text,
+      voluntarios: widget.activity?.voluntarios ?? [],
+      duracion: int.parse(_durationController.text),
+      asistencia: widget.activity?.asistencia ?? {},
+    );
+
+    final activitiesProvider = Provider.of<ActivitiesProvider>(context, listen: false);
+
+    if (widget.activity == null) {
+      await activitiesProvider.addActivity(activity);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Actividad creada con éxito")),
       );
-
-      final activitiesProvider =
-          Provider.of<ActivitiesProvider>(context, listen: false);
-
-      if (widget.activity == null) {
-        await activitiesProvider.addActivity(activity);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Actividad creada con éxito")),
-        );
-      } else {
-        await activitiesProvider.updateActivity(activity);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Actividad actualizada con éxito")),
-        );
-      }
-
-      Navigator.pop(context, true);
+    } else {
+      await activitiesProvider.updateActivity(activity);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Actividad actualizada con éxito")),
+      );
     }
-  }
 
+    // Notificar al proveedor que los datos han cambiado
+    await activitiesProvider.refreshActivities();
+
+    // Volver al Home
+    Navigator.pop(context, true);
+  }
+}
   Future<void> _openLocationPicker() async {
     final selectedLocation = await Navigator.push(
       context,
@@ -117,7 +119,33 @@ class _CreateOrEditActivityPageState extends State<CreateOrEditActivityPage> {
       });
     }
   }
-
+    final List<String> categories = [
+        "Medio Ambiente",
+        "Educación",
+        "Salud",
+        "Cultura",
+        "Deportes",
+        "Protección Animal",
+        "Asistencia Social",
+        "Tecnología",
+        "Construcción y Vivienda",
+        "Alimentación",
+        "Capacitación Laboral",
+        "Empoderamiento de la Mujer",
+        "Inclusión Social",
+        "Atención a Personas Mayores",
+        "Infancia y Juventud",
+        "Ayuda Social",
+        "Derechos Humanos",
+        "Arte y Música",
+        "Desastres Naturales",
+        "Desarrollo Comunitario",
+        "Turismo Responsable",
+        "Reciclaje y Gestión de Residuos",
+        "Apoyo Psicológico",
+        "Seguridad Alimentaria",
+        "Campañas de Sensibilización",
+];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -140,13 +168,14 @@ class _CreateOrEditActivityPageState extends State<CreateOrEditActivityPage> {
                 hintext: 'Título',
                 icon: const Icon(Icons.title),
                 controller: _titleController,
-                bgColor: Colors.transparent,
+                bgColor: Colors.white,
+                borderColor: Colors.pinkAccent,
               ),
               const SizedBox(height: 10),
               MultilineInputForm(
                 hintText: 'Descripción',
                 controller: _descriptionController,
-                bgColor: Colors.transparent,
+                bgColor: Colors.white,
                 borderColor: Colors.pinkAccent,
               ),
               const SizedBox(height: 10),
@@ -154,7 +183,8 @@ class _CreateOrEditActivityPageState extends State<CreateOrEditActivityPage> {
                 hintText: "Seleccione Fecha y Hora",
                 icon: const Icon(Icons.calendar_today),
                 controller: _dateTimeController,
-                bgColor: Colors.transparent,
+                bgColor: Colors.white,
+                borderColor: Colors.pink,
                 onDateTimeChanged: (dateTime) {
                   setState(() {
                     _selectedDateTime = dateTime;
@@ -167,7 +197,13 @@ class _CreateOrEditActivityPageState extends State<CreateOrEditActivityPage> {
               Row(
                 children: [
                   Expanded(
-                    child: InputForm(hintext: 'Ubicacion', icon: const Icon(Icons.location_on), controller: _locationController, bgColor: Colors.transparent,)
+                    child: InputForm(
+                      hintext: 'Ubicacion', 
+                      icon: const Icon(Icons.location_on), 
+                      controller: _locationController, 
+                      bgColor: Colors.white,
+                      borderColor: Colors.pinkAccent,
+                      )
                   ),
                   IconButton(
                     icon: const Icon(Icons.map, color: Colors.pinkAccent),
@@ -180,20 +216,23 @@ class _CreateOrEditActivityPageState extends State<CreateOrEditActivityPage> {
                 hintext: 'URL de Imagen',
                 icon: const Icon(Icons.image),
                 controller: _imageUrlController,
-                bgColor: Colors.transparent,
+                bgColor: Colors.white,
+                borderColor: Colors.pinkAccent,
               ),
               const SizedBox(height: 10),
               InputOptionsForm(
                 hintText: 'Seleccione Categoría',
                 icon: const Icon(Icons.category),
-                controller: _categoryController,
-                options: const ['Educación', 'Música', 'Deportes', 'Medio Ambiente'],
+                controller: _categoryController, 
+                borderColor: Colors.pinkAccent,
+                options: categories,
               ),
               const SizedBox(height: 10),
               InputForm(
                 hintext: 'Duracion', 
                 icon: const Icon(Icons.lock_clock), 
-                bgColor: Colors.transparent,
+                bgColor: Colors.white,
+                borderColor: Colors.pinkAccent,
                 controller: _durationController
                 ),
                 const SizedBox(height: 10),
@@ -202,7 +241,8 @@ class _CreateOrEditActivityPageState extends State<CreateOrEditActivityPage> {
                 icon: const Icon(Icons.numbers),
                 controller: _maxVolunteersController,
                 inputType: 'number',
-                bgColor: Colors.transparent,
+                bgColor: Colors.white,
+                borderColor: Colors.pinkAccent,
               ),
               const SizedBox(height: 20),
               Button(

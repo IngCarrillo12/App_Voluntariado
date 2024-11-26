@@ -4,27 +4,27 @@ import 'package:frontend_flutter/Widgets/Headers/SectionHeader.dart';
 import 'package:frontend_flutter/models/activitiesModel.dart';
 
 
-class SectionEvents extends StatefulWidget {
+
+class SectionPopularActivities extends StatefulWidget {
   final List<Activity> activities;
 
-  const SectionEvents({
+  const SectionPopularActivities({
     super.key,
     required this.activities, // Recibir las actividades como parámetro requerido
   });
 
   @override
-  _SectionEventsState createState() => _SectionEventsState();
+  _SectionPopularActivitesState createState() => _SectionPopularActivitesState();
 }
 
-class _SectionEventsState extends State<SectionEvents> {
+class _SectionPopularActivitesState extends State<SectionPopularActivities> {
   
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SectionHeader(title: "Actividades disponibles"),
+        const SectionHeader(title: "Actividades Populares"),
         const SizedBox(height: 12),
-        // Mostrar las actividades cargadas
         Column(
           children: widget.activities.map((activity) {
             return ActivityCard(

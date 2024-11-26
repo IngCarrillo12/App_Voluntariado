@@ -6,7 +6,9 @@ class Button extends StatelessWidget {
   final double width;
   final double paddingH;
   final double paddingV;
+  final double fontSize;
   final VoidCallback onPressed;
+
 
   const Button({
     super.key,
@@ -14,7 +16,8 @@ class Button extends StatelessWidget {
     required this.onPressed,
     this.width = 140.0,
     this.paddingH = 10,
-     this.paddingV = 10,
+    this.paddingV = 10,
+    this.fontSize = 14,
     this.bgColor = Colors.pinkAccent,
   });
 
@@ -33,7 +36,8 @@ class Button extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 18, color: Colors.white),
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: fontSize, color: Colors.white),
         ),
       ),
     );

@@ -12,6 +12,7 @@ class ActivityCard extends StatefulWidget {
   final GeoPoint location;
   final String activityId;
   final bool button;
+  
   const ActivityCard({
     super.key,
     required this.imageUrl,
@@ -37,7 +38,7 @@ class _ActivityCardState extends State<ActivityCard> {
   Future<void> _fetchLocationName() async {
     final address = await LocationService.getAddressFromGeoPoint(widget.location);
     setState(() {
-      _locationName = address; // Actualiza la dirección legible
+      _locationName = address; 
     });
   }
 
@@ -46,6 +47,7 @@ class _ActivityCardState extends State<ActivityCard> {
     final activitiesProvider = Provider.of<ActivitiesProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
+    bool activityFound = user?.historialParticipacion.contains(widget.activityId) ?? false;
 
     return GestureDetector(
       onTap: () {
@@ -89,18 +91,28 @@ class _ActivityCardState extends State<ActivityCard> {
           ),
           trailing: user?.rol != 'organizador' && widget.button == true
               ? Button(
-                  text: 'Asistir',
+                  text: activityFound? "Cancelar Asistencia" :'Asistir',
                   onPressed: () async {
-                    final userInfo = {
-                      'userId': user?.userId,
-                      'nombreCompleto': user?.nombreCompleto,
-                      'correo': user?.correo,
-                    };
-                    await userProvider.addActivityToHistory(widget.activityId);
-                    await activitiesProvider.addVolunteerToActivity(widget.activityId, userInfo);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Te has inscrito en la actividad.')),
-                    );
+                    if (user == null) return;
+
+                            final userInfo = {
+                              'userId': user.userId,
+                              'nombreCompleto': user.nombreCompleto,
+                              'correo': user.correo,
+                            };
+                            if (activityFound) {
+                              await userProvider.removeActivityFromHistory(widget.activityId);
+                              await activitiesProvider.removeVolunteerFromActivity(
+                                  widget.activityId, userInfo);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Has cancelado la asistencia')));
+                            } else {
+                              await userProvider.addActivityToHistory(widget.activityId);
+                              await activitiesProvider.addVolunteerToActivity(
+                                  widget.activityId, userInfo);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Te has inscrito en la actividad.')));
+                            }
                   },
                   bgColor: Colors.pinkAccent,
                   width: 100.0,

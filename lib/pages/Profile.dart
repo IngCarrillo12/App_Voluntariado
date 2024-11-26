@@ -115,7 +115,7 @@ class Profile extends StatelessWidget {
               Button(
                 text: 'Cerrar sesión',
                 onPressed: () async {
-                  await userProvider.signOut();
+                  await userProvider.signOut(context);
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     '/login',
@@ -172,6 +172,7 @@ class Profile extends StatelessWidget {
                           user?.rol == 'voluntario'?
                           activitiesByUser.isNotEmpty
                               ? ListView.builder(
+                                  scrollDirection: Axis.vertical,
                                   itemCount: activitiesByUser.length,
                                   itemBuilder: (context, index) {
                                     final activity = activitiesByUser[index];

@@ -7,7 +7,6 @@ class NavigationService {
   static final NavigationService _instance = NavigationService._internal();
   factory NavigationService() => _instance;
   NavigationService._internal();
-
   final ValueNotifier<int> selectedIndexNotifier = ValueNotifier<int>(0);
 
   void resetNavigation() {

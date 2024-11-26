@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/models/userModel.dart';
+import 'package:frontend_flutter/providers/activitiesProvider.dart';
 import 'package:frontend_flutter/services/authService.dart';
+import 'package:provider/provider.dart';
 
 class UserProvider extends ChangeNotifier {
   UserModel? _user;
@@ -34,7 +36,7 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-Future<void> removeActivityFromHistory(String activityId) async {
+  Future<void> removeActivityFromHistory(String activityId) async {
   if (_user != null) {
     await _authService.removeActivityFromHistory(_user!.userId, activityId);
     _user = UserModel(
@@ -52,11 +54,15 @@ Future<void> removeActivityFromHistory(String activityId) async {
   }
 }
   // Método para limpiar el usuario en el provider (opcional, por ejemplo, al cerrar sesión)
-  Future<void> signOut() async {
-    await _authService.signOut();
-    _user = null;
-    notifyListeners();
-  }
+Future<void> signOut(BuildContext context) async {
+  await _authService.signOut();
+  _user = null;
+
+  // Reinicia el estado del ActivitiesProvider
+  Provider.of<ActivitiesProvider>(context, listen: false).resetData();
+
+  notifyListeners();
+}
 
 Future<void> updateUserStatisticsForVolunteer(String userId, int activityDuration) async {
   try {

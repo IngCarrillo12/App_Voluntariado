@@ -1,16 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend_flutter/Widgets/Inputs/InputForm.dart';
 import 'package:frontend_flutter/Widgets/Navigation/BottomNavigationBar.dart';
 import 'package:frontend_flutter/Widgets/Button/CategoryButton.dart';
-import 'package:frontend_flutter/Widgets/SectionEvents.dart';
 import 'package:frontend_flutter/models/activitiesModel.dart';
-import 'package:frontend_flutter/utils/CheckLocation.dart';
-import 'package:frontend_flutter/utils/FilteredActivitiesByUser.dart';
 import 'package:frontend_flutter/providers/activitiesProvider.dart';
 import 'package:frontend_flutter/providers/userProvider.dart';
-import 'package:frontend_flutter/utils/location_service.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:frontend_flutter/utils/FilteredActivitiesByUser.dart';
+import 'package:frontend_flutter/widgets/Sections/SectionActivities.dart';
 import 'package:provider/provider.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:frontend_flutter/utils/location_service.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -22,31 +22,37 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   String? selectedCategory;
   String currentAddress = "Cargando ubicación...";
+  bool isFetchingLocation = false;
   final TextEditingController _searchController = TextEditingController();
+
+  // Variable para almacenar el Future de las actividades
+  late Future<void> _activitiesFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
-    _fetchCurrentLocation();
+    _initializeData();
+    _activitiesFuture = _loadActivities(); // Cargar actividades al inicio
   }
 
-  Future<void> _loadData() async {
-    final activitiesProvider = Provider.of<ActivitiesProvider>(context, listen: false);
-    await activitiesProvider.loadActivities();
+  Future<void> _initializeData() async {
+    if (currentAddress == "Cargando ubicación..." && !isFetchingLocation) {
+      await _fetchCurrentLocation();
+    }
   }
 
   Future<void> _fetchCurrentLocation() async {
+    setState(() {
+      isFetchingLocation = true;
+    });
+
     try {
-      await checkLocation();
-
-
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: LocationSettings(accuracy: LocationAccuracy.high),
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
       );
-
-      GeoPoint geoPoint = GeoPoint(position.latitude, position.longitude);
-      final address = await LocationService.getAddressFromGeoPoint(geoPoint);
+      String address = await LocationService.getAddressFromGeoPoint(
+        GeoPoint(position.latitude, position.longitude),
+      );
 
       setState(() {
         currentAddress = address;
@@ -56,7 +62,16 @@ class _HomeState extends State<Home> {
         currentAddress = "Error al obtener la ubicación";
       });
       print("Error al obtener la ubicación: $e");
+    } finally {
+      setState(() {
+        isFetchingLocation = false;
+      });
     }
+  }
+
+  Future<void> _loadActivities() async {
+    final activitiesProvider = Provider.of<ActivitiesProvider>(context, listen: false);
+    await activitiesProvider.refreshActivities();
   }
 
   void _performSearch(BuildContext context, String searchText, List<Activity> activities) {
@@ -76,19 +91,12 @@ class _HomeState extends State<Home> {
     final activitiesProvider = Provider.of<ActivitiesProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
-    final activities = activitiesProvider.activities;
 
-    // Obtener las categorías únicas
-    final categories = activities.map((activity) => activity.categoria).toSet().toList();
-
-    // Filtrar actividades basadas en la categoría seleccionada
-    final filteredActivities = FilteredActivitiesByUser.filter(
-      activities.where((activity) {
-        if (selectedCategory == null) return true;
-        return activity.categoria == selectedCategory;
-      }).toList(),
-      user,
-    ).take(7).toList();
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -109,74 +117,101 @@ class _HomeState extends State<Home> {
                 ),
               ],
             ),
-            IconButton(
-              icon: const Icon(Icons.notifications, color: Colors.grey),
-              onPressed: () {},
-            ),
           ],
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: _loadData,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ListView(
-            children: [
-              // Barra de búsqueda
-              Row(
+      body: FutureBuilder(
+        future: _activitiesFuture, // Usar el Future almacenado
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return const Center(child: Text("Error al cargar actividades"));
+          }
+
+          // Obtener actividades filtradas
+          final activities = activitiesProvider.activities;
+
+          // Obtener categorías únicas (incluyendo "Todas")
+          final categories = ["Todas", ...activities.map((activity) => activity.categoria).toSet()];
+
+          // Filtrar actividades por usuario y categoría
+          final activitiesByUser = FilteredActivitiesByUser.filter(activities, user);
+
+          final filteredActivities = activitiesByUser.where((activity) {
+            // Aplicar el filtro de categoría si está seleccionado
+            if (selectedCategory == null || selectedCategory == "Todas") return true;
+            return activity.categoria == selectedCategory;
+          }).toList();
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              // Al recargar, actualizar las actividades y reconstruir la vista
+              await activitiesProvider.refreshActivities();
+              setState(() {
+                _activitiesFuture = _loadActivities();
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ListView(
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: "Buscar actividades",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InputForm(
+                          controller: _searchController,
+                          hintext: 'Buscar actividad',
+                          icon: const Icon(Icons.search),
+                          bgColor: Colors.transparent,
+                          borderColor: Colors.grey,
                         ),
-                        prefixIcon: const Icon(Icons.search),
                       ),
+                      IconButton(
+                        icon: const Icon(Icons.search),
+                        onPressed: () {
+                          _performSearch(context, _searchController.text, activities);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Categorías
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: categories.map((category) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                          child: CategoryButton(
+                            label: category,
+                            icon: Icons.category,
+                            onPressed: () {
+                              setState(() {
+                                selectedCategory = category == "Todas" ? null : category;
+                              });
+                            },
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () {
-                      _performSearch(context, _searchController.text, activities);
-                    },
+                  const SizedBox(height: 20),
+
+                  // Actividades recomendadas
+                  SectionActivities(
+                    activities: filteredActivities,
+                    rol: user.rol,
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-
-              // Categorías
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: categories.map((category) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: CategoryButton(
-                        label: category,
-                        icon: Icons.category,
-                        onPressed: () {
-                          setState(() {
-                            selectedCategory = category;
-                          });
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Actividades recomendadas
-              SectionEvents(
-                activities: filteredActivities,
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
       bottomNavigationBar: CustomBottomNavigationBar(),
     );

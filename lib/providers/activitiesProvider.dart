@@ -73,6 +73,18 @@ void resetData() {
       print("Error al agregar voluntario: $e");
     }
   }
+  Future<void> addFeedbackToActivity(String activityId, Map<String, dynamic> feedback) async {
+    try {
+      await _activitiesService.addFeedback(activityId, feedback);
+      final activityIndex = _activities.indexWhere((activity) => activity.id == activityId);
+      if (activityIndex != -1) {
+        _activities[activityIndex].feedback.add(feedback);
+        notifyListeners();
+      }
+    } catch (e) {
+      print("Error al agregar voluntario: $e");
+    }
+  }
 
   Future<void> removeVolunteerFromActivity(String activityId, Map<String, dynamic> volunteerInfo) async {
     await _activitiesService.removeVolunteerFromActivity(activityId, volunteerInfo);

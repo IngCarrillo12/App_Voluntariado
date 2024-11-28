@@ -55,7 +55,17 @@ class ActivitiesService {
       print("Error al añadir voluntario: $e");
     }
   }
-Future<void> removeVolunteerFromActivity(String activityId, Map<String, dynamic> volunteerInfo) async {
+  Future<void> addFeedback(String activityId, Map<String, dynamic> feedback) async {
+    try {
+      await _activitiesCollection.doc(activityId).update({
+        'feedback': FieldValue.arrayUnion([feedback]),
+      });
+    } catch (e) {
+      print("Error al añadir feedback: $e");
+    }
+  }
+ 
+  Future<void> removeVolunteerFromActivity(String activityId, Map<String, dynamic> volunteerInfo) async {
   try {
     await _activitiesCollection.doc(activityId).update({
       'voluntarios': FieldValue.arrayRemove([volunteerInfo]),
@@ -65,6 +75,7 @@ Future<void> removeVolunteerFromActivity(String activityId, Map<String, dynamic>
   }
 }
   // Método para actualizar asistencia de un voluntario
+  
   Future<void> updateAttendance(String activityId, String userId, String status) async {
   try {
     final activityDoc = _activitiesCollection.doc(activityId);

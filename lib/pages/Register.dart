@@ -6,7 +6,9 @@ import 'package:frontend_flutter/Widgets/Button/ElevatedButton.dart';
 import 'package:frontend_flutter/Widgets/Headers/HeaderForm.dart';
 import 'package:frontend_flutter/Widgets/Inputs/InputForm.dart';
 import 'package:frontend_flutter/Widgets/Logo.dart';
+import 'package:frontend_flutter/providers/userProvider.dart';
 import 'package:frontend_flutter/services/authService.dart';
+import 'package:provider/provider.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -35,17 +37,15 @@ class _RegisterState extends State<Register> {
     if (nombre.isNotEmpty && email.isNotEmpty && password.isNotEmpty && telefono.isNotEmpty) {
       User? user = await _authService.register(email, password, nombre, telefono, _selectedRole);
 
-      if (user != null) {
+          if (user != null) {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        await userProvider.loadUserInfo(context);
         Navigator.pushNamed(context, '/home');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Error en el registro, inténtalo de nuevo")),
         );
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Por favor, completa todos los campos")),
-      );
     }
   }
 

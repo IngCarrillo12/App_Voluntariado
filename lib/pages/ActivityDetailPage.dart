@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/models/activitiesModel.dart';
+import 'package:frontend_flutter/pages/FeedbackForm.dart';
+import 'package:frontend_flutter/pages/viewAsistent.dart';
 import 'package:frontend_flutter/utils/location_service.dart';
 import 'package:frontend_flutter/pages/CreateOrEditActivityPage.dart';
 import 'package:frontend_flutter/Widgets/Button/ButtonIcon.dart';
@@ -34,13 +36,13 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
     return now.isAfter(activityDate) || now.isAtSameMomentAs(activityDate);
   }
  
-  Future<void> _updateAttendance(
-  BuildContext context,
-  ActivitiesProvider activitiesProvider,
-  UserProvider userProvider,
-  String voluntarioId,
-  String status,
-  Activity activity,
+        Future<void> _updateAttendance(
+        BuildContext context,
+        ActivitiesProvider activitiesProvider,
+        UserProvider userProvider,
+        String voluntarioId,
+        String status,
+        Activity activity,
 ) async {
   try {
     // Actualizar la asistencia en el provider
@@ -199,8 +201,9 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
                   Text(activity.descripcion, style: const TextStyle(color: Colors.grey)),
                   const SizedBox(height: 24),
                  // Botones de acción según el rol del usuario
-                 if(user?.rol == 'voluntario' && !_isDateCurrentOrFuture(activity.fechahora))
-                      Button(
+                 if(user?.rol == 'voluntario')
+                      !_isDateCurrentOrFuture(activity.fechahora)?
+                        Button(
                           text: activityFound ? 'Cancelar asistencia' : 'Asistir',
                           onPressed: () async {
                             if (user == null) return;
@@ -226,9 +229,35 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
                             }
                           },
                           bgColor: Colors.pinkAccent,
+                        )
+                        :
+                        Button(
+                          width: 120.0,
+                          paddingV: 0.0,
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text("Feedback ${activity.titulo}"),
+                                  content: FeedbackForm(activityId: activity.id),
+                                  actions: [
+                                    TextButton(
+                                      child: const Text("Cerrar"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          text: "Escribir Feedback",
                         ),
                       if(user?.rol == 'organizador')
-                          Column(
+                          !_isDateCurrentOrFuture(activity.fechahora)?
+                            Column(
                         children: [
                           Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -270,58 +299,21 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
                           ],
                           ),
                         ],
-                        ),
-
-                  if (user?.rol == 'organizador' && _isDateCurrentOrFuture(activity.fechahora))
-                    Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Título de Asistencia
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: Text(
-                        "Asistencia",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    // Lista de voluntarios y asistencia
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(), // Evita conflictos de scroll
-                      itemCount: activity.voluntarios.length,
-                      itemBuilder: (context, index) {
-                        final voluntario = activity.voluntarios[index];
-                        return ListTile(
-                          title: Text(voluntario['nombreCompleto']),
-                          trailing: DropdownButton<String>(
-                            value: activity.asistencia[voluntario['userId']] ?? "pendiente",
-                            items: const [
-                              DropdownMenuItem(value: "asistió", child: Text("Asistió")),
-                              DropdownMenuItem(value: "ausente", child: Text("Ausente")),
-                              DropdownMenuItem(value: "pendiente", child: Text("Pendiente")),
-                            ],
-                            onChanged: (value) async {
-                              if (value != null) {
-                                await _updateAttendance(
-                                  context,
-                                  activitiesProvider,
-                                  userProvider,
-                                  voluntario['userId'],
-                                  value,
-                                  activity,
-                );
-              }
-            },
-          ),
-        );
-      },
-    ),
-  ],
-)
+                        )
+                        :
+                        Button(text:'Tomar Asistencia' , onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AsistenciaWidget(
+                                activity: activity, // Pasas la actividad completa aquí
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                
+                    
                 ],
               ),
             ),

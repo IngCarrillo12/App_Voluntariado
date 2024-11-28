@@ -97,7 +97,7 @@ class _PopularCardState extends State<PopularCard> {
                       const SnackBar(content: Text('Te has inscrito en la actividad.')),
                     );
                   }
-                  setState(() {}); // Para actualizar el estado del botón.
+                  setState(() {});
                 },
                 bgColor: Colors.pinkAccent,
                 width: 100.0,

@@ -25,16 +25,17 @@ class _HomeState extends State<Home> {
   bool isFetchingLocation = false;
   final TextEditingController _searchController = TextEditingController();
 
-  // Variable para almacenar el Future de las actividades
+  // Usamos un futuro para obtener las actividades
   late Future<void> _activitiesFuture;
 
   @override
   void initState() {
     super.initState();
     _initializeData();
-    _activitiesFuture = _loadActivities(); // Cargar actividades al inicio
+    _activitiesFuture = _loadActivities();
   }
 
+  // Función para inicializar la ubicación
   Future<void> _initializeData() async {
     if (currentAddress == "Cargando ubicación..." && !isFetchingLocation) {
       await _fetchCurrentLocation();
@@ -69,11 +70,13 @@ class _HomeState extends State<Home> {
     }
   }
 
+  // Función para cargar las actividades
   Future<void> _loadActivities() async {
     final activitiesProvider = Provider.of<ActivitiesProvider>(context, listen: false);
     await activitiesProvider.refreshActivities();
   }
 
+  // Función de búsqueda
   void _performSearch(BuildContext context, String searchText, List<Activity> activities) {
     final searchResults = activities.where((activity) {
       return activity.titulo.toLowerCase().contains(searchText.toLowerCase());
@@ -121,7 +124,7 @@ class _HomeState extends State<Home> {
         ),
       ),
       body: FutureBuilder(
-        future: _activitiesFuture, // Usar el Future almacenado
+        future: _activitiesFuture, // Usamos el Future almacenado
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -130,29 +133,20 @@ class _HomeState extends State<Home> {
           if (snapshot.hasError) {
             return const Center(child: Text("Error al cargar actividades"));
           }
-
+     
           // Obtener actividades filtradas
           final activities = activitiesProvider.activities;
-
-          // Obtener categorías únicas (incluyendo "Todas")
           final categories = ["Todas", ...activities.map((activity) => activity.categoria).toSet()];
-
-          // Filtrar actividades por usuario y categoría
           final activitiesByUser = FilteredActivitiesByUser.filter(activities, user);
-
           final filteredActivities = activitiesByUser.where((activity) {
-            // Aplicar el filtro de categoría si está seleccionado
             if (selectedCategory == null || selectedCategory == "Todas") return true;
             return activity.categoria == selectedCategory;
           }).toList();
 
           return RefreshIndicator(
             onRefresh: () async {
-              // Al recargar, actualizar las actividades y reconstruir la vista
+              // Solo actualizar las actividades sin cambiar el future
               await activitiesProvider.refreshActivities();
-              setState(() {
-                _activitiesFuture = _loadActivities();
-              });
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),

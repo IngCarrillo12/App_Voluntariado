@@ -13,6 +13,7 @@ class Activity {
   final int duracion;
   final List<dynamic> voluntarios;
   final Map<String, String> asistencia;
+  final List<dynamic> feedback;
 
   Activity({
     required this.id,
@@ -26,6 +27,7 @@ class Activity {
     this.imageUrl,
     this.voluntarios = const [],
     required this.asistencia,
+    this.feedback = const [],
   });
 
   // Convertir a Map para guardar en Firestore
@@ -41,6 +43,7 @@ Map<String, dynamic> toMap() {
     'voluntarios': voluntarios,
     'duracion': duracion,
     'asistencia': asistencia,
+    'feedback': feedback
   };
 }
 
@@ -69,6 +72,7 @@ Map<String, dynamic> toMap() {
       voluntarios: map['voluntarios'] ?? [],
       duracion: map['duracion']?? 0,
       asistencia: Map<String, String>.from(map['asistencia'] ?? {}),
+      feedback: map['feedback'] ?? [],
     );
   }
 }

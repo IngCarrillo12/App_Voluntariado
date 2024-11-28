@@ -27,8 +27,7 @@ class ActivityCard extends StatefulWidget {
 }
 
 class _ActivityCardState extends State<ActivityCard> {
-  String _locationName = "Cargando..."; // Estado para almacenar la dirección legible
-
+  String _locationName = "Cargando..."; 
   @override
   void initState() {
     super.initState();

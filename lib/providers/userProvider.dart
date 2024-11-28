@@ -12,10 +12,17 @@ class UserProvider extends ChangeNotifier {
   UserModel? get user => _user;
 
   // Método para cargar la información del usuario
-  Future<void> loadUserInfo() async {
+  Future<void> loadUserInfo(context) async {
+  try {
     _user = await _authService.getUserInfoById();
     notifyListeners();
+  } catch (e) {
+    print("Error al cargar la información del usuario: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Error al cargar la información del usuario")),
+    );
   }
+}
 
   // Método para agregar actividad al historial del usuario
   Future<void> addActivityToHistory(String activityId) async {

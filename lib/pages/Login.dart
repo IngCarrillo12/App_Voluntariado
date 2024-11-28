@@ -38,7 +38,7 @@ Future<void> _signIn() async {
 
       // Reinicia el estado
       activitiesProvider.resetData();
-      await userProvider.loadUserInfo();
+      await userProvider.loadUserInfo(context);
       await activitiesProvider.loadActivities();
 
       Navigator.pushNamed(context, '/home');

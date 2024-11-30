@@ -76,7 +76,6 @@ class _HomeState extends State<Home> {
     await activitiesProvider.refreshActivities();
   }
 
-  // Función de búsqueda
   void _performSearch(BuildContext context, String searchText, List<Activity> activities) {
     final searchResults = activities.where((activity) {
       return activity.titulo.toLowerCase().contains(searchText.toLowerCase());
@@ -124,7 +123,7 @@ class _HomeState extends State<Home> {
         ),
       ),
       body: FutureBuilder(
-        future: _activitiesFuture, // Usamos el Future almacenado
+        future: _activitiesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -145,7 +144,6 @@ class _HomeState extends State<Home> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              // Solo actualizar las actividades sin cambiar el future
               await activitiesProvider.refreshActivities();
             },
             child: Padding(

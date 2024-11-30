@@ -11,30 +11,29 @@ class LocationPickerMap extends StatefulWidget {
 }
 
 class _LocationPickerMapState extends State<LocationPickerMap> {
-  LatLng? _currentLocation; // Para guardar la ubicación actual
-  LatLng? _selectedLocation; // Ubicación seleccionada por el usuario
-  late final MapController _mapController; // Controlador del mapa
-  bool _loading = true; // Indica si se está cargando la ubicación
-  bool _mapInitialized = false; // Verifica si el mapa fue inicializado
-  TextEditingController _searchController = TextEditingController(); // Para buscar lugares
+  LatLng? _currentLocation;
+  LatLng? _selectedLocation; 
+  late final MapController _mapController; 
+  bool _loading = true; 
+  bool _mapInitialized = false; 
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _mapController = MapController();
-    _getCurrentLocation(); // Obtén la ubicación al iniciar
+    _getCurrentLocation(); 
   }
 
   Future<void> _getCurrentLocation() async {
     try {
         await checkLocation();
-      // Configuración de precisión para obtener la ubicación
+
       LocationSettings locationSettings = const LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 10,
       );
 
-      // Obtén la ubicación actual
       Position position = await Geolocator.getCurrentPosition(
         locationSettings: locationSettings,
       );
@@ -42,7 +41,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
       setState(() {
         _currentLocation = LatLng(position.latitude, position.longitude);
         _loading = false;
-        _mapInitialized = true; // Marca que el mapa está listo
+        _mapInitialized = true; 
       });
     } catch (e) {
       setState(() {
@@ -64,14 +63,14 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
     }
 
     try {
-      List<Location> locations = await locationFromAddress(query);
+      List<Location> locations = await locationFromAddress(query); //geocoding
       if (locations.isNotEmpty) {
         Location location = locations.first;
         LatLng searchedLocation = LatLng(location.latitude, location.longitude);
 
         setState(() {
           _selectedLocation = searchedLocation;
-          _mapController.move(searchedLocation, 15.0); // Mueve el mapa al resultado
+          _mapController.move(searchedLocation, 15.0); 
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -95,7 +94,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
             icon: Icon(Icons.check),
             onPressed: () {
               if (_selectedLocation != null) {
-                Navigator.pop(context, _selectedLocation); // Devuelve la ubicación
+                Navigator.pop(context, _selectedLocation);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Selecciona una ubicación primero")),
@@ -122,24 +121,24 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                 ),
                 IconButton(
                   icon: Icon(Icons.search),
-                  onPressed: _searchLocation, // Buscar ubicación
+                  onPressed: _searchLocation, 
                 ),
               ],
             ),
           ),
           Expanded(
             child: _loading
-                ? Center(child: CircularProgressIndicator()) // Indicador de carga
+                ? Center(child: CircularProgressIndicator()) 
                 : FlutterMap(
                     mapController: _mapController,
                     options: MapOptions(
-                      center: _currentLocation, // Solo se centra si está inicializado
+                      center: _currentLocation, 
                       zoom: 15.0,
                       maxZoom: 18.0,
                       minZoom: 5.0,
                       onTap: (tapPosition, point) {
                         setState(() {
-                          _selectedLocation = point; // Guarda la ubicación seleccionada
+                          _selectedLocation = point; 
                         });
                       },
                     ),

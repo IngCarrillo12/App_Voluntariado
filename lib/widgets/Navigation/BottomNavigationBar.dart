@@ -10,12 +10,11 @@ class NavigationService {
   final ValueNotifier<int> selectedIndexNotifier = ValueNotifier<int>(0);
 
   void resetNavigation() {
-    selectedIndexNotifier.value = 0; // Reiniciar el índice al inicio
+    selectedIndexNotifier.value = 0;
   }
 
   Future<void> onItemTapped(BuildContext context, int index, String rol) async {
-    if (selectedIndexNotifier.value == index) return; // Evitar recargar la misma página
-
+    if (selectedIndexNotifier.value == index) return; 
     selectedIndexNotifier.value = index;
 
     if (rol == 'organizador') {
@@ -28,7 +27,7 @@ class NavigationService {
           if (result == true) {
             Provider.of<ActivitiesProvider>(context, listen: false).loadActivities();
           }
-          selectedIndexNotifier.value = 0; // Volver al inicio tras crear
+          selectedIndexNotifier.value = 0; 
           break;
         case 2:
           Navigator.pushNamedAndRemoveUntil(context, '/userActivitiesPage', (route) => false);
@@ -79,7 +78,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
       builder: (context, selectedIndex, child) {
         final validIndex = (selectedIndex >= 0 && selectedIndex < navigationItems.length)
             ? selectedIndex
-            : 0; // Validar índice
+            : 0; 
 
         return BottomNavigationBar(
           currentIndex: validIndex,

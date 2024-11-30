@@ -21,7 +21,7 @@ class UserModel {
     required this.historialParticipacion,
   });
 
-  // Factory method for creating a UserModel instance from Firestore data
+
   factory UserModel.fromFirestore(Map<String, dynamic> data) {
     return UserModel(
       userId: data['user_id'] ?? '',
@@ -36,7 +36,7 @@ class UserModel {
     );
   }
 
-  // Method to convert UserModel to a Firestore-compatible map
+
   Map<String, dynamic> toFirestore() {
     return {
       'user_id': userId,

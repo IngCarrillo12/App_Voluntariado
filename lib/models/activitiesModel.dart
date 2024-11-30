@@ -30,7 +30,6 @@ class Activity {
     this.feedback = const [],
   });
 
-  // Convertir a Map para guardar en Firestore
 Map<String, dynamic> toMap() {
   return {
     'titulo': titulo,
@@ -47,7 +46,7 @@ Map<String, dynamic> toMap() {
   };
 }
 
-  // Convertir desde Map
+
   factory Activity.fromMap(Map<String, dynamic> map, String id) {
     DateTime parsedDate;
     try {

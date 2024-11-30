@@ -6,7 +6,7 @@ Future<void> checkLocation() async {
         throw Exception("Los servicios de ubicación están deshabilitados.");
       }
 
-      // Solicita permisos si es necesario
+      
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();

@@ -6,7 +6,7 @@ class InputForm extends StatelessWidget {
   final Color plhColor;
   final Color txtColor;
   final Color borderColor;
-  final Color focusBorderColor; // Nuevo parámetro para el borde cuando está en focus
+  final Color focusBorderColor; 
   final Icon icon;
   final TextEditingController? controller;
   final bool obscureText;
@@ -19,7 +19,7 @@ class InputForm extends StatelessWidget {
     this.bgColor = Colors.black26,
     this.txtColor = Colors.black,
     this.borderColor = Colors.grey,
-    this.focusBorderColor = Colors.pinkAccent, // Color predeterminado para el borde en focus
+    this.focusBorderColor = Colors.pinkAccent, 
     required this.icon,
     required this.controller,
     this.obscureText = false,

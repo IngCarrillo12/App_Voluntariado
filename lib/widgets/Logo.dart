@@ -14,7 +14,7 @@ class Logo extends StatelessWidget {
               ),
               SizedBox(height: 10),
               Text(
-                "CITY EVENT",
+                "Voluntarys Forever",
                 style: TextStyle(
                   color: Colors.pinkAccent,
                   fontSize: 24,

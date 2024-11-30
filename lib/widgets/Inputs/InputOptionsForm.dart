@@ -19,7 +19,6 @@ class InputOptionsForm extends StatefulWidget {
   }) : super(key: key);
 
   static void _defaultOnChanged(String value) {}
-  // Método por defecto si no se proporciona onChanged.
 
   @override
   _InputOptionsForm createState() => _InputOptionsForm();
@@ -47,7 +46,7 @@ class _InputOptionsForm extends State<InputOptionsForm> {
                 title: Text(widget.options[index]),
                 onTap: () {
                   widget.controller.text = widget.options[index];
-                  widget.onChanged(widget.options[index]); // Siempre ejecuta onChanged
+                  widget.onChanged(widget.options[index]);
                   Navigator.pop(context);
                 },
               );
